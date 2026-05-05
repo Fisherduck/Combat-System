@@ -1,0 +1,18 @@
+local SpecsData = {
+	["Basic"] = {
+		Size = Vector3.new(5, 5, 5),
+		Offset = {Vector3.new(0,0,-4), Vector3.new(0,0,-4), Vector3.new(0,0,-4)},
+		OffsetDelay = 0.05,
+		Damage = 5
+	}
+}
+
+----------------------------------------
+
+function SpecsData.GetStats(name)
+	return SpecsData[name] or SpecsData["Basic"]
+end
+
+----------------------------------------
+
+return SpecsData
