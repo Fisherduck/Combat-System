@@ -1,0 +1,56 @@
+local M1s = {}
+M1s.__index = M1s
+
+local ComboResetTime = 2
+local MaxCombo = 3
+
+----------------------------------------
+
+function M1s.new(Player)
+	local self = setmetatable({}, M1s)
+	self.M1Number = 1
+	self.LastAttackTime = 0
+	self.Cooldown = false
+	self.Caster = Player
+	return self
+end
+
+
+function M1s:Count()
+	if self.M1Number >= MaxCombo then
+		self.M1Number = 1
+	else
+		self.M1Number += 1
+	end
+end
+
+
+function M1s:Execute()
+	if self.Cooldown then return end
+
+	local currentTime = time()
+	if currentTime - self.LastAttackTime >= ComboResetTime then
+		self.M1Number = 1
+	end
+
+	self.Cooldown = true
+
+	local combo = self.M1Number
+	print("M1 combo:", combo)
+
+	self.LastAttackTime = currentTime
+	self:Count()
+	
+	return combo
+end
+
+
+function M1s:ResetCooldown()
+	self.Cooldown = false
+end
+
+
+----------------------------------------
+
+return M1s
+
