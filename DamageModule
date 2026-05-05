@@ -1,0 +1,42 @@
+local Damage = {}
+Damage.__index = Damage
+
+local SpecsData = require(script.Parent:WaitForChild("SpecsModule"))
+local AnimationsModule = require(script.Parent:WaitForChild("AnimationsModule"))
+
+local Animations = AnimationsModule.HitAnimations
+
+----------------------------------------
+
+function Damage.new(styleName)
+	local self = setmetatable({}, Damage)
+	self.Data = SpecsData[styleName]
+	self.BaseDamage = self.Data.Damage
+	self.HitCache = {}
+	return self
+end
+
+
+function Damage:Apply(hitPart, caster)
+	local character = hitPart:FindFirstAncestorWhichIsA("Model")
+	if not character or character == caster then return end
+
+	if self.HitCache[character] then return end
+	self.HitCache[character] = true
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then return end
+
+	humanoid:TakeDamage(self.BaseDamage)
+
+	return character, humanoid
+end
+
+
+function Damage:ResetCache()
+	self.HitCache = {}
+end
+
+----------------------------------------
+
+return Damage
