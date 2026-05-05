@@ -1,0 +1,84 @@
+local RS = game:GetService("ReplicatedStorage")
+
+local SFXFolder = RS:WaitForChild("SFX")
+local M1Hit = SFXFolder:WaitForChild("M1Hit")
+
+local VFXFolder = RS:WaitForChild("VFX")
+local LeftPunchVFX = VFXFolder:WaitForChild("LPunch")
+local RightPunchVFX = VFXFolder:WaitForChild("RPunch")
+
+----------------------------------------
+
+local FXModule = {}
+FXModule.__index = FXModule
+
+
+FXModule.SFX = {
+	Hit = M1Hit,
+}
+
+
+FXModule.VFX = {
+	[1] = LeftPunchVFX,
+	[2] = RightPunchVFX,
+	[3] = LeftPunchVFX
+}
+
+----------------------------------------
+
+local soundDebounce = false
+
+function FXModule.PlaySFX(name, parent)
+	if soundDebounce then return end
+	soundDebounce = true
+	
+	local sound = FXModule.SFX[name]
+	if not sound then return end
+
+	local clone = sound:Clone()
+	clone.Parent = parent
+	clone:Play()
+
+	clone.Ended:Connect(function()
+		clone:Destroy()
+	end)
+	
+	task.delay(0.1, function()
+		soundDebounce = false
+	end)
+end
+
+
+function FXModule.PlayVFX(name, char)
+	local vfx = FXModule.VFX[name]
+	if not vfx then return end
+	
+	local clone = vfx:Clone()
+	clone.Parent = char
+
+	local targetPart
+
+	if name == 1 or name == 3 then
+		targetPart = char:FindFirstChild("Left Arm")
+	elseif name == 2 then
+		targetPart = char:FindFirstChild("Right Arm")
+	end
+
+	if targetPart then
+		clone.CFrame = targetPart.CFrame * CFrame.new(0, -0.5, 0)
+
+		local weld = clone:FindFirstChildOfClass("WeldConstraint")
+		if weld then
+			weld.Part0 = targetPart
+			weld.Part1 = clone
+		end
+	end
+
+	task.delay(0.5, function()
+		clone:Destroy()
+	end)
+end
+
+----------------------------------------
+
+return FXModule
