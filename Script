@@ -1,0 +1,25 @@
+local RS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local M1Event = RS:WaitForChild("M1Event")
+
+local ModuleFolder = RS:WaitForChild("Modules")
+local HitboxesModule = require(ModuleFolder:WaitForChild("HitboxesModule"))
+local SpeedModule = require(ModuleFolder:WaitForChild("SpeedModule"))
+local FXModule = require(ModuleFolder:WaitForChild("FXModule"))
+
+----------------------------------------
+
+local hitboxTemplate = HitboxesModule.new("Basic")
+
+
+M1Event.OnServerEvent:Connect(function(plr, combo)
+	local character = plr.Character
+	if not character then return end
+	
+	FXModule.PlayVFX(combo, character)
+	
+	SpeedModule.ApplySpeed(character, "M1")
+	
+	hitboxTemplate:CreateHitbox(character, combo)
+end)
