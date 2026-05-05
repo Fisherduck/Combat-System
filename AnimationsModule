@@ -1,0 +1,22 @@
+local RS = game:GetService("ReplicatedStorage")
+local AnimationsFolder = RS:WaitForChild("Anims")
+
+----------------------------------------
+
+local AnimationsModule = {
+	["HitAnimations"] = { 
+		[1] = AnimationsFolder:WaitForChild("Hit1"),
+		[2] = AnimationsFolder:WaitForChild("Hit2"),
+		[3] = AnimationsFolder:WaitForChild("Hit3")
+	},
+	
+	["BoxingM1Animations"] = {
+		[1] = AnimationsFolder:WaitForChild("Boxing M1 1"),
+		[2] = AnimationsFolder:WaitForChild("Boxing M1 2"),
+		[3] = AnimationsFolder:WaitForChild("Boxing M1 3")
+	}
+}
+
+----------------------------------------
+
+return AnimationsModule
