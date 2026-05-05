@@ -1,0 +1,60 @@
+local HitboxesModule = {}
+HitboxesModule.__index = HitboxesModule
+
+local DamageModule = require(script.Parent:WaitForChild("DamageModule"))
+local SpecsData = require(script.Parent:WaitForChild("SpecsModule"))
+local AnimationsModule = require(script.Parent:WaitForChild("AnimationsModule"))
+local SpeedModule = require(script.Parent:WaitForChild("SpeedModule"))
+local FXModule = require(script.Parent:WaitForChild("FXModule"))
+local StunModule = require(script.Parent:WaitForChild("StunModule"))
+
+local Animations = AnimationsModule.HitAnimations
+
+----------------------------------------
+
+function HitboxesModule.new(styleName)
+	local self = setmetatable({}, HitboxesModule)
+	self.Data = SpecsData[styleName]
+	self.Offset = self.Data.Offset
+	self.OffsetDelay = self.Data.OffsetDelay
+	self.Size = self.Data.Size
+	self.Damage = DamageModule.new(styleName)
+	return self
+end
+
+
+function HitboxesModule:CreateHitbox(caster, combo)
+	self.Damage:ResetCache()
+	for i, offset in ipairs(self.Offset) do
+	
+		task.spawn(function()
+			task.wait((i - 1) * self.OffsetDelay)
+
+			local hrp = caster:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+
+			local currentCFrame = hrp.CFrame * CFrame.new(offset)
+			local parts = workspace:GetPartBoundsInBox(currentCFrame, self.Size)
+
+			for _, part in ipairs(parts) do
+				local character, humanoid = self.Damage:Apply(part, caster)
+				
+				if humanoid then
+					StunModule.Stun(character, 1)
+					FXModule.PlaySFX("Hit", caster)
+					SpeedModule.ApplySpeed(character, "Hit")
+					
+					local animation = Animations[combo]
+					if animation then
+						local track = humanoid:LoadAnimation(animation)
+						track:Play()
+					end
+				end
+			end
+		end)
+	end
+end
+
+----------------------------------------
+
+return HitboxesModule
