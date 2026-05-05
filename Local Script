@@ -1,0 +1,66 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local ModuleFolder = RS:WaitForChild("Modules")
+local M1Module = require(ModuleFolder:WaitForChild("M1Module"))
+local AnimationsModule = require(ModuleFolder:WaitForChild("AnimationsModule"))
+local StunModule = require(ModuleFolder:WaitForChild("StunModule"))
+
+local M1Event = RS:WaitForChild("M1Event")
+
+----------------------------------------
+
+local Animations = AnimationsModule.BoxingM1Animations
+
+local M1 = M1Module.new(player)
+local inputLocked = false
+
+
+local function playM1(combo)
+	local animation = Animations[combo]
+	if not animation then return end
+
+	local track = humanoid:LoadAnimation(animation)
+	track:Play()
+
+	track:GetMarkerReachedSignal("ApplyDamage"):Once(function()
+		M1Event:FireServer(combo)
+	end)
+
+	track:GetMarkerReachedSignal("CanAttack"):Once(function()
+		M1:ResetCooldown()
+		inputLocked = false
+	end)
+
+	if combo == 3 then
+		inputLocked = true
+		task.delay(2, function()
+			M1:ResetCooldown()
+			inputLocked = false
+		end)
+	end
+end
+
+----------------------------------------
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if StunModule.CheckStun(character) then return end
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if inputLocked then return end
+
+		local combo = M1:Execute()
+		if not combo then return end
+
+		inputLocked = true
+
+		playM1(combo)
+	end
+end)
