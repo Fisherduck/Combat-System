@@ -1,0 +1,46 @@
+local SpeedModule = {}
+
+
+SpeedModule.Speeds = {
+	Base = 16,
+	M1 = 8,
+	Hit = 6,
+}
+
+
+SpeedModule.Duration = {
+	M1 = 0.75,
+	Hit = 1,
+}
+
+
+SpeedModule.ActiveTokens = {}
+
+----------------------------------------
+
+function SpeedModule.ApplySpeed(char, speedName)
+	local humanoid = char:FindFirstChild("Humanoid")
+	if not humanoid then return end
+
+	local speed = SpeedModule.Speeds[speedName]
+	if not speed then return end
+
+	local token = os.clock()
+	SpeedModule.ActiveTokens[char] = token
+
+	humanoid.WalkSpeed = speed
+
+	local duration = SpeedModule.Duration[speedName]
+	if duration then
+		task.delay(duration, function()
+			if SpeedModule.ActiveTokens[char] == token then
+				humanoid.WalkSpeed = SpeedModule.Speeds.Base
+				SpeedModule.ActiveTokens[char] = nil
+			end
+		end)
+	end
+end
+
+----------------------------------------
+
+return SpeedModule
