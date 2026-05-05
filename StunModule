@@ -1,0 +1,31 @@
+local StunModule = {}
+
+
+StunModule.AcitveTokens = {}
+
+----------------------------------------
+
+function StunModule.CheckStun(char)
+	if char:GetAttribute("Stunned") then
+		return true
+	end
+end
+
+
+function StunModule.Stun(char, duration)
+	local token = os.clock()
+	StunModule.AcitveTokens[char] = token
+	
+	char:SetAttribute("Stunned", true)
+	
+	task.delay(duration, function()
+		if StunModule.AcitveTokens[char] == token then
+			char:SetAttribute("Stunned", false)
+			StunModule.AcitveTokens[char] = nil
+		end
+	end)
+end
+
+----------------------------------------
+
+return StunModule
